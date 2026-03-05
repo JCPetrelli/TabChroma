@@ -8,11 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Locations
 
-- **Source repo:** `~/Documents/Scripts/tab_chroma/` — contains themes, commands, completions, Formula, install/uninstall scripts, and documentation. The main script `tab-chroma.sh` is **not** in this repo; it lives only in the installed location.
-- **Installed plugin:** `~/.claude/hooks/tab-chroma/` — the actual running code lives here (created by `install.sh`)
+- **Source repo:** `~/Documents/Scripts/tab_chroma/` — contains `tab-chroma.sh`, themes, commands, completions, Formula, install/uninstall scripts, and documentation.
+- **Installed plugin:** `~/.claude/hooks/tab-chroma/` — the running copy, installed by `install.sh` (copies `tab-chroma.sh`, `themes/`, `completions/`, `VERSION`)
 - **Design plan:** `docs/plans/2026-03-04-tab-chroma-plugin-plan.md`
 
-When editing the plugin script, **work directly in `~/.claude/hooks/tab-chroma/`**. When editing themes, commands, completions, or the installer, work in the source repo.
+Edit `tab-chroma.sh` in the source repo, then run `bash install.sh` to sync to the installed location. The two copies should stay identical.
 
 ## Installation
 
@@ -33,7 +33,7 @@ tab-chroma install
 
 ```bash
 # Validate bash syntax
-bash -n ~/.claude/hooks/tab-chroma/tab-chroma.sh
+bash -n tab-chroma.sh
 
 # Test a visual state manually (must be run from an actual iTerm2 terminal)
 tab-chroma test working
