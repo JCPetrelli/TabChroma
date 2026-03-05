@@ -462,6 +462,21 @@ PYEOF
     echo "alias added to $zshrc (run: source ~/.zshrc)"
   fi
 
+  # Add claude() wrapper so tab resets when exiting Claude Code (Ctrl+C etc.)
+  # Claude Code has no SessionEnd hook, so a shell wrapper is the only way.
+  local wrapper_marker="# tab-chroma: reset tab on claude exit"
+  if ! grep -qF "$wrapper_marker" "$zshrc" 2>/dev/null; then
+    {
+      echo ""
+      echo "$wrapper_marker"
+      echo 'claude() {'
+      echo '  command claude "$@"'
+      echo '  tab-chroma reset > /dev/null 2>&1'
+      echo '}'
+    } >> "$zshrc"
+    echo "claude() wrapper added to $zshrc (run: source ~/.zshrc)"
+  fi
+
   local comp_dir="$HOME/.bash_completion.d"
   local comp_src="$SCRIPT_DIR/completions/tab-chroma.bash"
   if [ -f "$comp_src" ]; then
@@ -518,8 +533,27 @@ PYEOF
   rm -f "$HOME/.bash_completion.d/tab-chroma"
   rm -f "$HOME/.config/fish/completions/tab-chroma.fish"
 
-  echo ""
-  echo "Note: if you added 'alias tab-chroma=...' to .zshrc/.bashrc, remove it manually."
+  echo "Removing shell entries from ~/.zshrc..."
+  python3 - "$HOME/.zshrc" << 'PYEOF'
+import sys, re
+zshrc = sys.argv[1]
+try:
+    with open(zshrc) as f:
+        content = f.read()
+except FileNotFoundError:
+    sys.exit(0)
+# Remove alias block: "# tab-chroma\nalias tab-chroma=..."
+content = re.sub(r'\n# tab-chroma\nalias tab-chroma=.*\n?', '', content)
+# Remove wrapper block (5 lines after marker)
+content = re.sub(
+    r'\n# tab-chroma: reset tab on claude exit\nclaude\(\) \{\n  command claude "\$@"\n  tab-chroma reset > /dev/null 2>&1\n\}\n?',
+    '', content
+)
+with open(zshrc, 'w') as f:
+    f.write(content)
+print("  Removed tab-chroma entries from ~/.zshrc")
+PYEOF
+
   echo ""
   echo "Removing $install_dir..."
   rm -rf "$install_dir"
