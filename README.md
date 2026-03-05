@@ -1,6 +1,6 @@
 # TabChroma
 
-iTerm2 visual feedback plugin for [Claude Code](https://claude.ai/code). Changes your tab color, badge, and title based on what Claude is doing — so you can glance at any tab and know its state at a moment's notice.
+iTerm2 visual feedback plugin for [Claude Code](https://claude.ai/code). Changes your tab color, badge, and title based on what Claude is doing - so you can glance at any tab and know its state at a moment's notice.
 
 | State | Default Color | Meaning |
 |-------|--------------|---------|
@@ -15,7 +15,7 @@ iTerm2 visual feedback plugin for [Claude Code](https://claude.ai/code). Changes
 - macOS with [iTerm2](https://iterm2.com)
 - [Claude Code](https://claude.ai/code) CLI
 - Python 3 (standard library only)
-- **zsh** — the installer writes the shell alias and `claude()` wrapper to `~/.zshrc`. bash and fish are not supported by the installer; add the following manually to your shell rc file:
+- **zsh** - the installer writes the shell alias and `claude()` wrapper to `~/.zshrc`. bash and fish are not supported by the installer; add the following manually to your shell rc file:
 
 ```bash
 # Makes `tab-chroma` available as a command
@@ -32,7 +32,7 @@ claude() {
 
 ## Installation
 
-### Option 1 — curl (recommended)
+### Option 1 - curl (recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/JCPetrelli/TabChroma/main/install.sh | bash
@@ -44,7 +44,7 @@ Reload your shell, then test it:
 tab-chroma test working
 ```
 
-### Option 2 — Homebrew
+### Option 2 - Homebrew
 
 ```bash
 brew tap JCPetrelli/tab-chroma https://github.com/JCPetrelli/TabChroma
@@ -52,7 +52,7 @@ brew install tab-chroma
 tab-chroma install   # registers Claude Code hooks
 ```
 
-### Option 3 — Manual
+### Option 3 - Manual
 
 ```bash
 git clone https://github.com/JCPetrelli/TabChroma.git
@@ -95,7 +95,7 @@ SETUP:
 
 ### Badge
 
-The badge is a large watermark text displayed in the background of the iTerm2 terminal window. When enabled, it shows the current project name and state label (e.g. `my-project` / `Working`) — visible at a glance even when the tab is active and you're looking directly at the terminal.
+The badge is a large watermark text displayed in the background of the iTerm2 terminal window. When enabled, it shows the current project name and state label (e.g. `my-project` / `Working`) - visible at a glance even when the tab is active and you're looking directly at the terminal.
 
 The badge is **off by default**. Enable it with:
 
@@ -198,23 +198,23 @@ tab-chroma registers itself as a Claude Code hook for these events:
 
 | Hook | State |
 |------|-------|
-| `SessionStart` | session.start — resets tab color |
+| `SessionStart` | session.start - resets tab color |
 | `UserPromptSubmit` | working |
 | `PreToolUse` | working |
-| `PostToolUse` | working — recovers from permission state |
+| `PostToolUse` | working - recovers from permission state |
 | `Stop` | done |
 | `Notification` | attention or permission (based on message) |
 | `PermissionRequest` | permission |
 
 ### Debouncing
 
-If the same state fires more than once within `debounce_seconds` (default: 2s), subsequent updates are skipped. A typical Claude turn with many tool uses would otherwise send dozens of identical escape sequences, causing unnecessary overhead and visual noise. Debouncing means only the first transition to a state triggers a visual update — subsequent identical events within the window are no-ops.
+If the same state fires more than once within `debounce_seconds` (default: 2s), subsequent updates are skipped. A typical Claude turn with many tool uses would otherwise send dozens of identical escape sequences, causing unnecessary overhead and visual noise. Debouncing means only the first transition to a state triggers a visual update - subsequent identical events within the window are no-ops.
 
 `permission` and `attention` bypass debouncing entirely and always update immediately, since you never want to miss them.
 
 ### Permission recovery
 
-When Claude needs to use a restricted tool, `PermissionRequest` fires and the tab turns red. Once you approve and the tool runs, `PostToolUse` fires and the tab returns to working (blue) automatically — you don't need to do anything.
+When Claude needs to use a restricted tool, `PermissionRequest` fires and the tab turns red. Once you approve and the tool runs, `PostToolUse` fires and the tab returns to working (blue) automatically - you don't need to do anything.
 
 ### Implementation notes
 
@@ -236,4 +236,4 @@ brew untap JCPetrelli/tab-chroma
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT - see [LICENSE](LICENSE)
