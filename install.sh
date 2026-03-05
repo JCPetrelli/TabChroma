@@ -4,7 +4,7 @@
 
 set -e
 
-REPO="JCPetrelli/tab_chroma"
+REPO="JCPetrelli/TabChroma"
 INSTALL_DIR="$HOME/.claude/hooks/tab-chroma"
 
 # ─── Detect local vs remote install ───────────────────────────────────────────

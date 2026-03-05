@@ -35,7 +35,7 @@ claude() {
 ### Option 1 — curl (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JCPetrelli/tab_chroma/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JCPetrelli/TabChroma/main/install.sh | bash
 ```
 
 Reload your shell, then test it:
@@ -47,7 +47,7 @@ tab-chroma test working
 ### Option 2 — Homebrew
 
 ```bash
-brew tap JCPetrelli/tab-chroma https://github.com/JCPetrelli/tab_chroma
+brew tap JCPetrelli/tab-chroma https://github.com/JCPetrelli/TabChroma
 brew install tab-chroma
 tab-chroma install   # registers Claude Code hooks
 ```
@@ -55,8 +55,8 @@ tab-chroma install   # registers Claude Code hooks
 ### Option 3 — Manual
 
 ```bash
-git clone https://github.com/JCPetrelli/tab_chroma.git
-cd tab_chroma
+git clone https://github.com/JCPetrelli/TabChroma.git
+cd TabChroma
 bash install.sh
 ```
 

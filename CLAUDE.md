@@ -21,10 +21,10 @@ Edit `tab-chroma.sh` in the source repo, then run `bash install.sh` to sync to t
 bash install.sh
 
 # Or via curl
-curl -fsSL https://raw.githubusercontent.com/JCPetrelli/tab_chroma/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JCPetrelli/TabChroma/main/install.sh | bash
 
 # Or via Homebrew
-brew tap JCPetrelli/tab-chroma https://github.com/JCPetrelli/tab_chroma
+brew tap JCPetrelli/tab-chroma https://github.com/JCPetrelli/TabChroma
 brew install tab-chroma
 tab-chroma install
 ```

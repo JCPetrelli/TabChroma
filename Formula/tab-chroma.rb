@@ -1,7 +1,7 @@
 class TabChroma < Formula
   desc "iTerm2 visual feedback plugin for Claude Code"
-  homepage "https://github.com/JCPetrelli/tab_chroma"
-  url "https://github.com/JCPetrelli/tab_chroma/archive/refs/tags/v1.0.0.tar.gz"
+  homepage "https://github.com/JCPetrelli/TabChroma"
+  url "https://github.com/JCPetrelli/TabChroma/archive/refs/tags/v1.0.0.tar.gz"
   sha256 "8490b4dcc8122ae7dfde29ca30abb3a93e91445f770d0ad1925cf386ad5f830f"
   license "MIT"
   version "1.0.0"
