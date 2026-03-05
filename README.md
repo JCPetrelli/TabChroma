@@ -234,16 +234,6 @@ brew uninstall tab-chroma
 brew untap JCPetrelli/tab-chroma
 ```
 
-## Migration from tab-tint
-
-If you previously used tab-tint, uninstall it first:
-
-```bash
-tab-tint uninstall
-```
-
-Then install tab-chroma as above.
-
 ## License
 
 MIT — see [LICENSE](LICENSE)
