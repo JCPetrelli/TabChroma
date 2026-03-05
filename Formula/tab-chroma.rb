@@ -2,14 +2,12 @@ class TabChroma < Formula
   desc "iTerm2 visual feedback plugin for Claude Code"
   homepage "https://github.com/JCPetrelli/tab_chroma"
   url "https://github.com/JCPetrelli/tab_chroma/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "PLACEHOLDER_UPDATE_AFTER_FIRST_RELEASE"
+  sha256 "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed"
   license "MIT"
   version "1.0.0"
 
-  # No compilation needed — pure bash + Python 3 (stdlib only)
+  # No compilation needed — pure bash + Python 3 (macOS stdlib)
   bottle :unneeded
-
-  depends_on "python3" => :recommended
 
   def install
     # Install script and themes to share dir
