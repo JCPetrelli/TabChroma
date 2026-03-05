@@ -15,6 +15,20 @@ iTerm2 visual feedback plugin for [Claude Code](https://claude.ai/code). Changes
 - macOS with [iTerm2](https://iterm2.com)
 - [Claude Code](https://claude.ai/code) CLI
 - Python 3 (standard library only)
+- **zsh** — the installer writes the shell alias and `claude()` wrapper to `~/.zshrc`. bash and fish are not supported by the installer; add the following manually to your shell rc file:
+
+```bash
+# Makes `tab-chroma` available as a command
+alias tab-chroma='~/.claude/hooks/tab-chroma/tab-chroma.sh'
+
+# Wraps the `claude` command so the tab color resets when you exit Claude Code.
+# Claude Code has no SessionEnd hook, so without this the tab stays colored
+# after you close the session.
+claude() {
+  command claude "$@"
+  tab-chroma reset > /dev/null 2>&1
+}
+```
 
 ## Installation
 
@@ -75,6 +89,37 @@ TESTING:
 SETUP:
   install               Register Claude Code hooks
   uninstall             Remove hooks and data files
+```
+
+## Features
+
+### Badge
+
+The badge is a large watermark text displayed in the background of the iTerm2 terminal window. When enabled, it shows the current project name and state label (e.g. `my-project` / `Working`) — visible at a glance even when the tab is active and you're looking directly at the terminal.
+
+The badge is **off by default**. Enable it with:
+
+```bash
+tab-chroma badge on
+tab-chroma badge off   # to disable again
+```
+
+The badge color tracks the tab color (e.g. blue while working, green when done).
+
+### Title
+
+When enabled, the tab title is updated to show the project name and current state (e.g. `◉ my-project: working`). On by default.
+
+```bash
+tab-chroma title on|off
+```
+
+### Color
+
+Controls whether the tab background color changes at all. Disabling this leaves all other features (badge, title) unaffected. On by default.
+
+```bash
+tab-chroma color on|off
 ```
 
 ## Themes
@@ -138,7 +183,7 @@ Create a directory under `~/.claude/hooks/tab-chroma/themes/<name>/` with a `the
   "enabled": true,
   "features": {
     "tab_color": true,
-    "badge": true,
+    "badge": false,
     "title": true
   },
   "debounce_seconds": 2,

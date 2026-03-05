@@ -92,7 +92,7 @@ ensure_config() {
   "enabled": true,
   "features": {
     "tab_color": true,
-    "badge": true,
+    "badge": false,
     "title": true
   },
   "states": {
@@ -583,6 +583,15 @@ config.setdefault("features", {})["$key"] = $bool_val
 json.dump(config, open("$CONFIG", "w"), indent=2)
 print(f"$feature: $value")
 EOF
+
+  # Immediately apply visual effect when disabling
+  if [ "$value" = "off" ]; then
+    case "$feature" in
+      badge) set_badge ""; reset_badge_color;;
+      color) reset_tab_color;;
+    esac
+  fi
+  true
 }
 
 # ─── CLI Routing ───────────────────────────────────────────────────────────────
