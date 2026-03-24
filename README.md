@@ -1,5 +1,9 @@
 # TabChroma
 
+<p align="center">
+  <img src="docs/assets/presentation.gif" alt="TabChroma demo" />
+</p>
+
 iTerm2 visual feedback plugin for [Claude Code](https://claude.ai/code). Changes your tab color, badge, and title based on what Claude is doing - so you can glance at any tab and know its state at a moment's notice.
 
 | State | Default Color | Meaning |
