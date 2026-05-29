@@ -3,11 +3,21 @@
 # Changes tab color, badge, and title based on Claude Code hook events
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG="$SCRIPT_DIR/config.json"
-STATE="$SCRIPT_DIR/.state.json"
-PAUSED="$SCRIPT_DIR/.paused"
-THEMES_DIR="$SCRIPT_DIR/themes"
-VERSION_FILE="$SCRIPT_DIR/VERSION"
+
+# SHARE_DIR holds read-only assets (the script, themes, completions, VERSION).
+# DATA_DIR holds writable runtime files (config.json, .state.json, .paused).
+# Both default to SCRIPT_DIR for a plain git/curl install where everything
+# lives together. The Homebrew wrapper and install.sh export TAB_CHROMA_SHARE
+# and TAB_CHROMA_DATA to keep the read-only Cellar/share copy separate from the
+# writable ~/.claude/hooks/tab-chroma data dir.
+SHARE_DIR="${TAB_CHROMA_SHARE:-$SCRIPT_DIR}"
+DATA_DIR="${TAB_CHROMA_DATA:-$SCRIPT_DIR}"
+
+CONFIG="$DATA_DIR/config.json"
+STATE="$DATA_DIR/.state.json"
+PAUSED="$DATA_DIR/.paused"
+THEMES_DIR="$SHARE_DIR/themes"
+VERSION_FILE="$SHARE_DIR/VERSION"
 
 if [[ -r "$VERSION_FILE" ]]; then
   read -r VERSION < "$VERSION_FILE"
@@ -86,6 +96,7 @@ get_active_theme() {
 
 ensure_config() {
   if [ ! -f "$CONFIG" ]; then
+    mkdir -p "$DATA_DIR"
     cat > "$CONFIG" << 'EOF'
 {
   "active_theme": "default",
@@ -412,9 +423,13 @@ cmd_reset() {
 
 cmd_install() {
   local settings="$HOME/.claude/settings.json"
-  local hook_cmd="$SCRIPT_DIR/tab-chroma.sh"
-  local events="SessionStart UserPromptSubmit PreToolUse Stop Notification PermissionRequest"
+  # Register a stable command path. The Homebrew wrapper exports
+  # TAB_CHROMA_HOOK_CMD pointing at bin/tab-chroma so hooks survive upgrades
+  # instead of pinning a versioned Cellar path.
+  local hook_cmd="${TAB_CHROMA_HOOK_CMD:-$SCRIPT_DIR/tab-chroma.sh}"
+  local events="SessionStart UserPromptSubmit PreToolUse PostToolUse Stop Notification PermissionRequest"
 
+  mkdir -p "$HOME/.claude"
   if [ ! -f "$settings" ]; then
     echo '{}' > "$settings"
   fi
@@ -478,7 +493,7 @@ PYEOF
   fi
 
   local comp_dir="$HOME/.bash_completion.d"
-  local comp_src="$SCRIPT_DIR/completions/tab-chroma.bash"
+  local comp_src="$SHARE_DIR/completions/tab-chroma.bash"
   if [ -f "$comp_src" ]; then
     mkdir -p "$comp_dir"
     cp "$comp_src" "$comp_dir/tab-chroma"
@@ -489,6 +504,7 @@ PYEOF
 cmd_uninstall() {
   local settings="$HOME/.claude/settings.json"
   local install_dir="$SCRIPT_DIR"
+  local hook_cmd="${TAB_CHROMA_HOOK_CMD:-$SCRIPT_DIR/tab-chroma.sh}"
 
   read -r -p "Remove tab-chroma completely? This will remove all files and hooks. [y/N] " confirm
   if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
@@ -497,9 +513,12 @@ cmd_uninstall() {
   fi
 
   echo "Removing hooks from $settings..."
-  python3 - "$settings" "$install_dir" << 'PYEOF'
+  # Match on every path tab-chroma may have registered: the share/script dir,
+  # the writable data dir, and the stable hook command (Homebrew wrapper).
+  python3 - "$settings" "$install_dir" "$DATA_DIR" "$hook_cmd" << 'PYEOF'
 import json, os, sys
-settings_path, install_dir = sys.argv[1], sys.argv[2]
+settings_path = sys.argv[1]
+needles = [n for n in sys.argv[2:] if n]
 if not os.path.exists(settings_path):
     print("  settings.json not found, skipping"); sys.exit(0)
 try:
@@ -510,7 +529,8 @@ changed = False
 for event, entries in cfg.get("hooks", {}).items():
     for entry in entries:
         orig = list(entry.get("hooks", []))
-        entry["hooks"] = [h for h in orig if install_dir not in h.get("command", "")]
+        entry["hooks"] = [h for h in orig
+                          if not any(n in h.get("command", "") for n in needles)]
         if len(entry["hooks"]) != len(orig):
             changed = True
 if changed:
@@ -555,9 +575,19 @@ print("  Removed tab-chroma entries from ~/.zshrc")
 PYEOF
 
   echo ""
-  echo "Removing $install_dir..."
-  rm -rf "$install_dir"
-  echo "Done. tab-chroma has been uninstalled."
+  # Always remove the writable data dir (config/state/paused).
+  if [ -n "$DATA_DIR" ] && [ -d "$DATA_DIR" ]; then
+    echo "Removing data dir $DATA_DIR..."
+    rm -rf "$DATA_DIR"
+  fi
+  # Remove the install dir only for a self-contained git/curl install. For a
+  # Homebrew install the script lives in a brew-managed share dir, so leave it
+  # to `brew uninstall`.
+  if [ "$install_dir" = "$DATA_DIR" ]; then
+    echo "Done. tab-chroma has been uninstalled."
+  else
+    echo "Done. To remove the package files, run: brew uninstall tab-chroma"
+  fi
 }
 
 cmd_feature_toggle() {
@@ -698,7 +728,11 @@ state_name = state_map.get(event, "")
 if event == "Notification":
     if "permission" in notification_type or "approval" in notification_type:
         state_name = "permission"
-    # generic completion notifications are ignored (Stop already handles "done")
+    else:
+        # Any other notification (e.g. Claude idle / waiting for input) is an
+        # attention cue. Stop already covers the "done" case, so this won't
+        # fight it.
+        state_name = "attention"
 elif event == "PermissionRequest":
     state_name = "permission"
 
