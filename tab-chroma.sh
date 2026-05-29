@@ -413,7 +413,7 @@ cmd_reset() {
 cmd_install() {
   local settings="$HOME/.claude/settings.json"
   local hook_cmd="$SCRIPT_DIR/tab-chroma.sh"
-  local events="SessionStart UserPromptSubmit PreToolUse Stop Notification PermissionRequest"
+  local events="SessionStart SessionEnd UserPromptSubmit PreToolUse Stop Notification PermissionRequest"
 
   if [ ! -f "$settings" ]; then
     echo '{}' > "$settings"
@@ -462,19 +462,23 @@ PYEOF
     echo "alias added to $zshrc (run: source ~/.zshrc)"
   fi
 
-  # Add claude() wrapper so tab resets when exiting Claude Code (Ctrl+C etc.)
-  # Claude Code has no SessionEnd hook, so a shell wrapper is the only way.
+  # Tab reset on exit is handled by the SessionEnd hook (registered above).
+  # Older versions shimmed a claude() shell wrapper to do this; remove it if
+  # present so upgrading installs don't keep shadowing the `claude` command.
   local wrapper_marker="# tab-chroma: reset tab on claude exit"
-  if ! grep -qF "$wrapper_marker" "$zshrc" 2>/dev/null; then
-    {
-      echo ""
-      echo "$wrapper_marker"
-      echo 'claude() {'
-      echo '  command claude "$@"'
-      echo '  tab-chroma reset > /dev/null 2>&1'
-      echo '}'
-    } >> "$zshrc"
-    echo "claude() wrapper added to $zshrc (run: source ~/.zshrc)"
+  if grep -qF "$wrapper_marker" "$zshrc" 2>/dev/null; then
+    python3 - "$zshrc" << 'PYEOF'
+import re, sys
+zshrc = sys.argv[1]
+with open(zshrc) as f:
+    content = f.read()
+content = re.sub(
+    r'\n# tab-chroma: reset tab on claude exit\nclaude\(\) \{\n  command claude "\$@"\n  tab-chroma reset > /dev/null 2>&1\n\}\n?',
+    '', content)
+with open(zshrc, "w") as f:
+    f.write(content)
+PYEOF
+    echo "removed legacy claude() wrapper from $zshrc (run: source ~/.zshrc)"
   fi
 
   local comp_dir="$HOME/.bash_completion.d"
@@ -701,6 +705,10 @@ if event == "Notification":
     # generic completion notifications are ignored (Stop already handles "done")
 elif event == "PermissionRequest":
     state_name = "permission"
+elif event == "SessionEnd":
+    # Reuse the session.start "reset" action so the tab clears when the agent
+    # exits — replaces the old claude() shell wrapper.
+    state_name = "session.start"
 
 if not state_name:
     print('ACTION="skip"')
@@ -760,10 +768,14 @@ else:
     theme_name = config.get("active_theme", "default")
 
 # Pin theme to session
-if session_id and state_name == "session.start":
+if session_id and event == "SessionStart":
     session_themes[session_id] = theme_name
 elif session_id and session_id in session_themes:
     theme_name = session_themes[session_id]
+
+# Drop the pin when the session ends so the map doesn't grow unbounded
+if session_id and event == "SessionEnd":
+    session_themes.pop(session_id, None)
 
 # --- Load theme ---
 theme_file = os.path.join(themes_dir, theme_name, "theme.json")
