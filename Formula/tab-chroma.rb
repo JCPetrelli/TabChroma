@@ -1,10 +1,10 @@
 class TabChroma < Formula
   desc "iTerm2 visual feedback plugin for Claude Code"
   homepage "https://github.com/JCPetrelli/TabChroma"
-  url "https://github.com/JCPetrelli/TabChroma/archive/refs/tags/v1.0.1.tar.gz"
-  sha256 "4534dc10ead4397016ba390fc0ae40a833a2c161f8b760cd3a97269e0708a4b0"
+  url "https://github.com/JCPetrelli/TabChroma/archive/refs/tags/v1.0.2.tar.gz"
+  sha256 "043b148b218f2a2b9ba30e16dff35d744fa2a29dad6bd089ab1fcbce9f2524da"
   license "MIT"
-  version "1.0.1"
+  version "1.0.2"
 
   def install
     # Install script and themes to share dir
