@@ -64,6 +64,19 @@ cd TabChroma
 bash install.sh
 ```
 
+### Updating
+
+To update an existing install to the latest version:
+
+```bash
+tab-chroma update
+```
+
+This re-runs the installer (or `brew upgrade` for Homebrew installs). Your
+`config.json` and `.state.json` are preserved, and the update takes effect on
+the next Claude Code hook event — no restart needed. You can also re-run the
+curl command from Option 1 at any time.
+
 ## Usage
 
 ```
@@ -93,6 +106,7 @@ TESTING:
 SETUP:
   install               Register Claude Code hooks
   uninstall             Remove hooks and data files
+  update                Update tab-chroma to the latest version
 ```
 
 ## Features

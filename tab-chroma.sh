@@ -174,6 +174,7 @@ INFO:
 SETUP:
   install               Register Claude Code hooks
   uninstall             Remove hooks, completions, and data files
+  update                Update tab-chroma to the latest version
 EOF
 }
 
@@ -586,6 +587,31 @@ PYEOF
   echo "Done. tab-chroma has been uninstalled."
 }
 
+cmd_update() {
+  local repo="JCPetrelli/TabChroma"
+
+  # Homebrew-managed install: defer to brew so its bookkeeping stays correct.
+  if command -v brew >/dev/null 2>&1 && brew list tab-chroma >/dev/null 2>&1; then
+    echo "tab-chroma is managed by Homebrew — updating via brew..."
+    brew update >/dev/null 2>&1
+    brew upgrade tab-chroma
+    return $?
+  fi
+
+  # curl/git install: re-run the installer. It overwrites tab-chroma.sh,
+  # themes, completions and VERSION but preserves config.json/.state.json,
+  # and re-registers hooks idempotently. Changes take effect on the next
+  # hook event — no need to restart Claude Code.
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "error: curl is required to self-update" >&2
+    echo "update manually: https://github.com/$repo" >&2
+    return 1
+  fi
+
+  echo "Updating tab-chroma to the latest version from $repo..."
+  curl -fsSL "https://raw.githubusercontent.com/$repo/main/install.sh" | bash
+}
+
 cmd_feature_toggle() {
   local feature="$1" value="$2"
   local key
@@ -655,6 +681,7 @@ route_cli() {
 
     install)   cmd_install;;
     uninstall) cmd_uninstall;;
+    update)    cmd_update;;
 
     *)
       echo "unknown command: $cmd" >&2
