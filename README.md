@@ -14,6 +14,8 @@ iTerm2 visual feedback plugin for [Claude Code](https://claude.ai/code). Changes
 | permission | Red | Awaiting approval |
 | session.start | Reset | New session began |
 
+> **Want to know which session a tab belongs to, not only its state?** [tab-tag](https://github.com/JCPetrelli/tab-tag) is a companion Claude Code mod that names each iTerm2 tab with one or two words taken from your first prompt (for example `CHECKOUT TESTS`) and gives each session its own colour. TabChroma answers "what is Claude doing?", tab-tag answers "which session is this?". To use both, run `tab-chroma title off`: TabChroma then controls the colour and tab-tag the name.
+
 ## Requirements
 
 - macOS with [iTerm2](https://iterm2.com)
